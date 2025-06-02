@@ -1,12 +1,41 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+
+import { useState } from "react";
+import { Sidebar } from "@/components/layout/Sidebar";
+import { Dashboard } from "@/components/dashboard/Dashboard";
+import { ClientManagement } from "@/components/clients/ClientManagement";
+import { ServiceManagement } from "@/components/services/ServiceManagement";
+import { TeamManagement } from "@/components/team/TeamManagement";
+import { POSSystem } from "@/components/pos/POSSystem";
+import { SalesReports } from "@/components/reports/SalesReports";
 
 const Index = () => {
+  const [activeView, setActiveView] = useState("dashboard");
+
+  const renderActiveView = () => {
+    switch (activeView) {
+      case "dashboard":
+        return <Dashboard />;
+      case "clients":
+        return <ClientManagement />;
+      case "services":
+        return <ServiceManagement />;
+      case "team":
+        return <TeamManagement />;
+      case "pos":
+        return <POSSystem />;
+      case "reports":
+        return <SalesReports />;
+      default:
+        return <Dashboard />;
+    }
+  };
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold mb-4">Welcome to Your Blank App</h1>
-        <p className="text-xl text-gray-600">Start building your amazing project here!</p>
-      </div>
+    <div className="flex h-screen bg-gray-50">
+      <Sidebar activeView={activeView} setActiveView={setActiveView} />
+      <main className="flex-1 overflow-auto">
+        {renderActiveView()}
+      </main>
     </div>
   );
 };
