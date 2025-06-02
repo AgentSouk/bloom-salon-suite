@@ -7,7 +7,8 @@ import {
   UserCheck, 
   CreditCard, 
   BarChart3,
-  Sparkles
+  Sparkles,
+  Calendar
 } from "lucide-react";
 
 interface SidebarProps {
@@ -17,6 +18,7 @@ interface SidebarProps {
 
 const navItems = [
   { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
+  { id: "calendar", label: "Calendar", icon: Calendar },
   { id: "pos", label: "Point of Sale", icon: CreditCard },
   { id: "clients", label: "Clients", icon: Users },
   { id: "services", label: "Services", icon: Scissors },
