@@ -1,8 +1,8 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
+import { AppointmentDetailSheet } from "./AppointmentDetailSheet";
 
 const teamMembers = [
   { id: 1, name: "Barsha Branch", initial: "B", color: "bg-blue-100 text-blue-700" },
@@ -114,10 +114,21 @@ const sampleAppointments = [
 
 export const Calendar = () => {
   const [currentDate, setCurrentDate] = useState("Mon 2 Jun");
+  const [selectedAppointment, setSelectedAppointment] = useState(null);
+  const [isSheetOpen, setIsSheetOpen] = useState(false);
 
   const navigateDate = (direction: 'prev' | 'next') => {
     // In a real app, this would update the actual date
     console.log(`Navigate ${direction}`);
+  };
+
+  const handleAppointmentClick = (appointment) => {
+    setSelectedAppointment(appointment);
+    setIsSheetOpen(true);
+  };
+
+  const getTeamMemberForAppointment = (memberId) => {
+    return teamMembers.find(member => member.id === memberId);
   };
 
   return (
@@ -200,11 +211,12 @@ export const Calendar = () => {
                         .map((appointment) => (
                           <div
                             key={appointment.id}
-                            className={`absolute left-1 right-1 ${appointment.color} text-white text-xs p-1 rounded shadow-sm`}
+                            className={`absolute left-1 right-1 ${appointment.color} text-white text-xs p-1 rounded shadow-sm cursor-pointer hover:opacity-90 transition-opacity`}
                             style={{
                               top: `${appointment.startSlot * 48}px`,
                               height: `${appointment.duration * 24}px`,
                             }}
+                            onClick={() => handleAppointmentClick(appointment)}
                           >
                             <div className="font-medium truncate">{appointment.time} {appointment.clientName}</div>
                             <div className="truncate opacity-90">{appointment.service}</div>
@@ -218,6 +230,13 @@ export const Calendar = () => {
           </div>
         </CardContent>
       </Card>
+
+      <AppointmentDetailSheet
+        appointment={selectedAppointment}
+        isOpen={isSheetOpen}
+        onClose={() => setIsSheetOpen(false)}
+        teamMember={selectedAppointment ? getTeamMemberForAppointment(selectedAppointment.memberId) : undefined}
+      />
     </div>
   );
 };
