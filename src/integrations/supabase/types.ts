@@ -48,6 +48,81 @@ export type Database = {
         }
         Relationships: []
       }
+      team_members: {
+        Row: {
+          additional_phone: string | null
+          calendar_color: string | null
+          created_at: string
+          email: string
+          employment_type: string | null
+          end_date: string | null
+          end_year: number | null
+          first_name: string
+          id: string
+          job_title: string | null
+          last_name: string | null
+          location: string | null
+          notes: string | null
+          permission_level: string | null
+          phone_number: string | null
+          rating: number | null
+          review_count: number | null
+          start_date: string | null
+          start_year: number | null
+          team_member_id: string | null
+          updated_at: string
+          visible_to_clients: boolean | null
+        }
+        Insert: {
+          additional_phone?: string | null
+          calendar_color?: string | null
+          created_at?: string
+          email: string
+          employment_type?: string | null
+          end_date?: string | null
+          end_year?: number | null
+          first_name: string
+          id?: string
+          job_title?: string | null
+          last_name?: string | null
+          location?: string | null
+          notes?: string | null
+          permission_level?: string | null
+          phone_number?: string | null
+          rating?: number | null
+          review_count?: number | null
+          start_date?: string | null
+          start_year?: number | null
+          team_member_id?: string | null
+          updated_at?: string
+          visible_to_clients?: boolean | null
+        }
+        Update: {
+          additional_phone?: string | null
+          calendar_color?: string | null
+          created_at?: string
+          email?: string
+          employment_type?: string | null
+          end_date?: string | null
+          end_year?: number | null
+          first_name?: string
+          id?: string
+          job_title?: string | null
+          last_name?: string | null
+          location?: string | null
+          notes?: string | null
+          permission_level?: string | null
+          phone_number?: string | null
+          rating?: number | null
+          review_count?: number | null
+          start_date?: string | null
+          start_year?: number | null
+          team_member_id?: string | null
+          updated_at?: string
+          visible_to_clients?: boolean | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
