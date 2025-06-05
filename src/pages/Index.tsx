@@ -3,7 +3,7 @@ import { useState } from "react";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { Dashboard } from "@/components/dashboard/Dashboard";
 import { ClientManagement } from "@/components/clients/ClientManagement";
-import { ServiceManagement } from "@/components/services/ServiceManagement";
+import { CatalogManagement } from "@/components/catalog/CatalogManagement";
 import { TeamManagement } from "@/components/team/TeamManagement";
 import { POSSystem } from "@/components/pos/POSSystem";
 import { SalesReports } from "@/components/reports/SalesReports";
@@ -20,8 +20,8 @@ const Index = () => {
         return <Calendar />;
       case "clients":
         return <ClientManagement />;
-      case "services":
-        return <ServiceManagement />;
+      case "catalog":
+        return <CatalogManagement />;
       case "team":
         return <TeamManagement />;
       case "pos":

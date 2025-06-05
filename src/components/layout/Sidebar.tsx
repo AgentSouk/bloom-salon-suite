@@ -8,7 +8,8 @@ import {
   CreditCard, 
   BarChart3,
   Sparkles,
-  Calendar
+  Calendar,
+  Package
 } from "lucide-react";
 
 interface SidebarProps {
@@ -21,7 +22,7 @@ const navItems = [
   { id: "calendar", label: "Calendar", icon: Calendar },
   { id: "pos", label: "Point of Sale", icon: CreditCard },
   { id: "clients", label: "Clients", icon: Users },
-  { id: "services", label: "Services", icon: Scissors },
+  { id: "catalog", label: "Catalog", icon: Package },
   { id: "team", label: "Team", icon: UserCheck },
   { id: "reports", label: "Reports", icon: BarChart3 },
 ];
