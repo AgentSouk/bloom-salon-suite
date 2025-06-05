@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -139,11 +140,11 @@ export const ClientList = () => {
                     </h3>
                     <div className="flex items-center mt-1">
                       <Badge variant="outline" className="text-green-600 border-green-200">
-                        {client.total_visits || 0} visits
+                        {client.reviews_count || 0} reviews
                       </Badge>
                       <span className="mx-2 text-gray-400">•</span>
                       <span className="text-gray-600">
-                        AED {client.total_spent || 0}
+                        AED {client.total_sales || 0}
                       </span>
                     </div>
                   </div>
@@ -189,12 +190,9 @@ export const ClientList = () => {
 
                 <div className="mt-4 pt-4 border-t">
                   <div className="flex justify-between text-sm">
-                    <span className="text-gray-500">Last visit</span>
+                    <span className="text-gray-500">Member since</span>
                     <span className="font-medium">
-                      {client.last_visit 
-                        ? new Date(client.last_visit).toLocaleDateString()
-                        : "Never"
-                      }
+                      {new Date(client.created_at).toLocaleDateString()}
                     </span>
                   </div>
                 </div>

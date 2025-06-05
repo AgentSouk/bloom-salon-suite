@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import {
   Dialog,
@@ -64,10 +65,11 @@ export const AddClientDialog = ({
 
     setIsLoading(true);
     try {
-      const { error } = await supabase.from("clients").insert([{
+      const { error } = await supabase.from("clients").insert({
         ...formData,
+        birthday: formData.birthday ? formData.birthday.toISOString().split('T')[0] : null,
         birth_year: formData.birth_year ? parseInt(formData.birth_year) : null,
-      }]);
+      });
 
       if (error) throw error;
 
