@@ -17,6 +17,7 @@ const teamMembers = [
   { id: 9, name: "Samar", initial: "S", color: "bg-yellow-100 text-yellow-700" },
 ];
 
+// Updated time slots from 8am to 11:30pm
 const timeSlots = [
   "8:00", "9:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", 
   "16:00", "17:00", "18:00", "19:00", "20:00", "21:00", "22:00", "23:00", "23:30"
@@ -139,7 +140,7 @@ const getTimeFromPosition = (position: number, slotHeight: number) => {
   const selectedHour = startHour + hourIndex;
   
   // Format the time
-  if (selectedHour < 24) {
+  if (selectedHour <= 23) {
     return `${selectedHour.toString().padStart(2, '0')}:00`;
   } else if (selectedHour === 24) {
     return "00:00";
@@ -271,7 +272,7 @@ export const Calendar = () => {
                         <div key={slotIndex} className="h-[60px] border-b border-gray-100 hover:bg-gray-50 transition-colors"></div>
                       ))}
 
-                      {/* Current time line */}
+                      {/* Current time line - straight red line */}
                       {showCurrentTimeLine && (
                         <div 
                           className="absolute left-0 right-0 h-0.5 bg-red-500 z-20 pointer-events-none"
@@ -289,7 +290,7 @@ export const Calendar = () => {
                         .map((appointment) => (
                           <div
                             key={appointment.id}
-                            className={`absolute left-1 right-1 ${getAppointmentColor(appointment.status)} text-xs p-2 rounded border shadow-sm cursor-pointer hover:opacity-90 transition-opacity z-10`}
+                            className={`absolute left-1 right-1 ${getAppointmentColor(appointment.status)} text-xs p-2 rounded border shadow-sm cursor-pointer hover:opacity-90 transition-opacity z-10 overflow-hidden`}
                             style={{
                               top: `${appointment.startSlot * 60}px`,
                               height: `${appointment.duration * 30}px`,
@@ -301,9 +302,9 @@ export const Calendar = () => {
                           >
                             {appointment.status !== "completed" && (
                               <>
-                                <div className="font-medium truncate text-xs leading-tight">{appointment.time}</div>
-                                <div className="truncate opacity-90 text-xs leading-tight">{appointment.clientName}</div>
-                                <div className="truncate opacity-75 text-xs leading-tight">{appointment.service}</div>
+                                <div className="font-medium text-xs leading-tight break-words">{appointment.time}</div>
+                                <div className="text-xs leading-tight break-words overflow-hidden">{appointment.clientName}</div>
+                                <div className="text-xs leading-tight break-words overflow-hidden opacity-75">{appointment.service}</div>
                               </>
                             )}
                           </div>

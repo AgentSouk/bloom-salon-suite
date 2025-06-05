@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import {
   Sheet,
@@ -30,7 +29,7 @@ interface Appointment {
   memberId: number;
   startSlot: number;
   duration: number;
-  color: string;
+  status: string;
 }
 
 interface AppointmentDetailSheetProps {
@@ -43,15 +42,56 @@ interface AppointmentDetailSheetProps {
     initial: string;
     color: string;
   };
+  newAppointmentData?: {
+    memberId: number;
+    time: string;
+  } | null;
 }
 
 export const AppointmentDetailSheet = ({ 
   appointment, 
   isOpen, 
   onClose,
-  teamMember 
+  teamMember,
+  newAppointmentData
 }: AppointmentDetailSheetProps) => {
   const [isCheckedOut, setIsCheckedOut] = useState(false);
+
+  // Handle new appointment creation
+  if (newAppointmentData && !appointment) {
+    return (
+      <Sheet open={isOpen} onOpenChange={onClose}>
+        <SheetContent side="right" className="w-96 p-0">
+          <div className="bg-blue-500 text-white p-4">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-sm font-medium">New Appointment</span>
+              <Badge variant="secondary" className="bg-white/20 text-white border-none">
+                Create
+              </Badge>
+            </div>
+            <div className="text-sm opacity-90 mb-3">{newAppointmentData.time}</div>
+            <div className="flex items-center space-x-3">
+              <Avatar className="h-12 w-12">
+                <AvatarFallback className={`${teamMember?.color} font-bold text-lg`}>
+                  {teamMember?.initial}
+                </AvatarFallback>
+              </Avatar>
+              <div>
+                <h2 className="font-semibold text-lg">{teamMember?.name}</h2>
+                <p className="text-blue-100 text-sm">Available for booking</p>
+              </div>
+            </div>
+          </div>
+          
+          <div className="p-4">
+            <Button className="w-full bg-blue-500 hover:bg-blue-600">
+              Create New Appointment
+            </Button>
+          </div>
+        </SheetContent>
+      </Sheet>
+    );
+  }
 
   if (!appointment) return null;
 
