@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -17,16 +16,17 @@ const teamMembers = [
   { id: 9, name: "Samar", initial: "S", color: "bg-yellow-100 text-yellow-700" },
 ];
 
-// Updated time slots from 8am to 11:30pm
-const timeSlots = [
-  "8:00", "9:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", 
-  "16:00", "17:00", "18:00", "19:00", "20:00", "21:00", "22:00", "23:00", "23:30"
-];
+// Updated time slots from 9am to 11:50pm
+const timeSlots = Array.from({ length: 59 }, (_, i) => {
+  const hour = Math.floor(i / 4) + 9;
+  const minute = (i % 4) * 15;
+  return `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
+});
 
 const sampleAppointments = [
   {
     id: 1,
-    clientName: "Gel Manicure",
+    clientName: "Sarah Johnson",
     service: "Gel Manicure",
     time: "10:15 - 11:15",
     memberId: 4,
@@ -36,7 +36,7 @@ const sampleAppointments = [
   },
   {
     id: 2,
-    clientName: "Classic Pedicure", 
+    clientName: "Emma Davis",
     service: "Classic Pedicure",
     time: "10:15 - 11:15",
     memberId: 5,
@@ -46,8 +46,8 @@ const sampleAppointments = [
   },
   {
     id: 3,
-    clientName: "Walk-In Gents - manicure and pedicure",
-    service: "Combo OFFER",
+    clientName: "Michael Brown",
+    service: "Haircut & Beard Trim",
     time: "11:30 - 12:10",
     memberId: 1,
     startSlot: 3.5,
@@ -56,8 +56,8 @@ const sampleAppointments = [
   },
   {
     id: 4,
-    clientName: "Mana Classic Manicure",
-    service: "Classic Manicure", 
+    clientName: "Lisa Chen",
+    service: "Classic Manicure",
     time: "11:30 - 12:30",
     memberId: 4,
     startSlot: 3.5,
@@ -66,9 +66,9 @@ const sampleAppointments = [
   },
   {
     id: 5,
-    clientName: "Mana Classic Pedicure",
+    clientName: "Amanda White",
     service: "Classic Pedicure",
-    time: "11:30 - 12:30", 
+    time: "11:30 - 12:30",
     memberId: 5,
     startSlot: 3.5,
     duration: 2,
@@ -76,7 +76,7 @@ const sampleAppointments = [
   },
   {
     id: 6,
-    clientName: "Walk-In Haircut & Beard Zero",
+    clientName: "James Wilson",
     service: "Haircut & Beard Zero",
     time: "10:25 - 11:25",
     memberId: 8,
@@ -86,8 +86,8 @@ const sampleAppointments = [
   },
   {
     id: 7,
-    clientName: "Muna Haircut+ blowdry",
-    service: "Haircut+ blowdry", 
+    clientName: "Sophia Martinez",
+    service: "Haircut & Blowdry",
     time: "11:00 - 12:00",
     memberId: 8,
     startSlot: 3,
@@ -96,8 +96,8 @@ const sampleAppointments = [
   },
   {
     id: 8,
-    clientName: "Walk-In Haircut - Children",
-    service: "Haircut - Children",
+    clientName: "Oliver Kim",
+    service: "Children's Haircut",
     time: "11:20 - 12:20",
     memberId: 9,
     startSlot: 3.33,
@@ -124,8 +124,8 @@ const getCurrentTimePosition = () => {
   const currentHour = now.getHours();
   const currentMinute = now.getMinutes();
   
-  // Calculate position from 8:00 AM start
-  const startHour = 8;
+  // Calculate position from 9:00 AM start
+  const startHour = 9;
   const hoursSinceStart = currentHour - startHour;
   const minutesFraction = currentMinute / 60;
   const totalHours = hoursSinceStart + minutesFraction;
@@ -136,16 +136,14 @@ const getCurrentTimePosition = () => {
 
 const getTimeFromPosition = (position: number, slotHeight: number) => {
   const hourIndex = Math.floor(position / slotHeight);
-  const startHour = 8;
+  const startHour = 9;
   const selectedHour = startHour + hourIndex;
   
   // Format the time
   if (selectedHour <= 23) {
     return `${selectedHour.toString().padStart(2, '0')}:00`;
-  } else if (selectedHour === 24) {
-    return "00:00";
   }
-  return `${(selectedHour - 24).toString().padStart(2, '0')}:00`;
+  return "23:50";
 };
 
 export const Calendar = () => {
@@ -233,10 +231,10 @@ export const Calendar = () => {
             </div>
           </div>
         </CardHeader>
-        <CardContent className="p-0">
-          <div className="flex h-full">
+        <CardContent className="p-0 overflow-auto">
+          <div className="flex">
             {/* Time column */}
-            <div className="w-20 border-r">
+            <div className="w-20 border-r flex-shrink-0">
               <div className="h-16 border-b"></div>
               {timeSlots.map((time, index) => (
                 <div key={index} className="h-[60px] border-b px-2 py-1 text-xs text-gray-500 flex items-start">
@@ -272,7 +270,7 @@ export const Calendar = () => {
                         <div key={slotIndex} className="h-[60px] border-b border-gray-100 hover:bg-gray-50 transition-colors"></div>
                       ))}
 
-                      {/* Current time line - straight red line */}
+                      {/* Current time line */}
                       {showCurrentTimeLine && (
                         <div 
                           className="absolute left-0 right-0 h-0.5 bg-red-500 z-20 pointer-events-none"
