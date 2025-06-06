@@ -83,8 +83,26 @@ const teamMembers = [
   }
 ];
 
+// Custom Day Column Wrapper component
+const CustomDayColumnWrapper = ({ children, value }: any) => {
+  const isToday = moment(value).isSame(moment(), 'day');
+  const isWeekend = moment(value).day() === 0 || moment(value).day() === 6;
+  
+  return (
+    <div 
+      className={`
+        h-full relative
+        ${isToday ? 'bg-blue-50 border-l-4 border-blue-400' : ''}
+        ${isWeekend ? 'bg-gray-50' : 'bg-white'}
+      `}
+    >
+      {children}
+    </div>
+  );
+};
+
 export const AppointmentScheduler = () => {
-  const [currentView, setCurrentView] = useState(Views.WEEK);
+  const [currentView, setCurrentView] = useState<string>(Views.WEEK);
   const [currentDate, setCurrentDate] = useState(new Date());
 
   const handleEventClick = (event: any) => {
@@ -140,13 +158,6 @@ export const AppointmentScheduler = () => {
       </div>
       <div className="flex space-x-2">
         <Button
-          variant={currentView === Views.MONTH ? "default" : "outline"}
-          size="sm"
-          onClick={() => onView(Views.MONTH)}
-        >
-          Month
-        </Button>
-        <Button
           variant={currentView === Views.WEEK ? "default" : "outline"}
           size="sm"
           onClick={() => onView(Views.WEEK)}
@@ -183,7 +194,7 @@ export const AppointmentScheduler = () => {
             events={sampleEvents}
             startAccessor="start"
             endAccessor="end"
-            view={currentView}
+            view={currentView as any}
             onView={handleViewChange}
             date={currentDate}
             onNavigate={handleNavigate}
@@ -193,7 +204,10 @@ export const AppointmentScheduler = () => {
             eventPropGetter={eventStyleGetter}
             components={{
               toolbar: CustomToolbar,
+              dayColumnWrapper: CustomDayColumnWrapper,
             }}
+            views={[Views.WEEK, Views.DAY]}
+            defaultView={Views.WEEK}
             min={new Date(0, 0, 0, 8, 0, 0)}
             max={new Date(0, 0, 0, 23, 0, 0)}
             step={60}
