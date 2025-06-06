@@ -1,6 +1,6 @@
-
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DollarSign, Users, Calendar, TrendingUp } from "lucide-react";
+import { AppointmentScheduler } from "@/components/appointment/AppointmentScheduler";
 
 export const Dashboard = () => {
   const stats = [
@@ -58,6 +58,10 @@ export const Dashboard = () => {
             </CardContent>
           </Card>
         ))}
+      </div>
+
+      <div className="mb-8">
+        <AppointmentScheduler />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
