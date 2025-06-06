@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Scheduler } from '@aldabil/react-scheduler';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -186,7 +185,9 @@ export const AppointmentScheduler = () => {
                 end: "End",
                 allDay: "All Day"
               },
-              moreEvents: "More..."
+              moreEvents: "More...",
+              noDataToDisplay: "No data to display",
+              loading: "Loading..."
             }}
           />
         </div>
