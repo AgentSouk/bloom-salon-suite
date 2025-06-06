@@ -103,8 +103,8 @@ export const AppointmentScheduler = () => {
     console.log("Event clicked:", event);
   };
 
-  const handleSlotClick = (date: Date, resourceId?: string) => {
-    console.log("Slot clicked:", { date, resourceId });
+  const handleSlotClick = (start: Date, end: Date, resourceKey?: string, resourceVal?: string | number) => {
+    console.log("Slot clicked:", { start, end, resourceKey, resourceVal });
   };
 
   return (
@@ -151,6 +151,9 @@ export const AppointmentScheduler = () => {
             month={{
               weekDays: [0, 1, 2, 3, 4, 5, 6],
               weekStartOn: 6,
+              startHour: 8,
+              endHour: 23,
+              step: 60,
               navigation: true
             }}
             day={{
@@ -166,7 +169,8 @@ export const AppointmentScheduler = () => {
                 month: "Month",
                 week: "Week", 
                 day: "Day",
-                today: "Today"
+                today: "Today",
+                agenda: "Agenda"
               },
               form: {
                 addTitle: "Add Event",
@@ -177,6 +181,7 @@ export const AppointmentScheduler = () => {
               },
               event: {
                 title: "Title",
+                subtitle: "Subtitle",
                 start: "Start",
                 end: "End",
                 allDay: "All Day"
