@@ -1,110 +1,175 @@
-import React from 'react';
-import { Scheduler } from '@aldabil/react-scheduler';
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
-// Sample events data with timezone consideration
+import React, { useState, useMemo } from 'react';
+import { Calendar, momentLocalizer, Views } from 'react-big-calendar';
+import moment from 'moment';
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import 'react-big-calendar/lib/css/react-big-calendar.css';
+
+const localizer = momentLocalizer(moment);
+
+// Sample events data
 const sampleEvents = [
   {
-    event_id: 1,
+    id: 1,
     title: "Sarah Johnson - Gel Manicure",
     start: new Date(new Date().setHours(10, 15, 0, 0)),
     end: new Date(new Date().setHours(11, 15, 0, 0)),
-    admin_id: "nadeen",
-    color: "#3174ad"
+    resource: "nadeen"
   },
   {
-    event_id: 2,
+    id: 2,
     title: "Emma Davis - Classic Pedicure", 
     start: new Date(new Date().setHours(10, 15, 0, 0)),
     end: new Date(new Date().setHours(11, 15, 0, 0)),
-    admin_id: "raghe",
-    color: "#e91e63"
+    resource: "raghe"
   },
   {
-    event_id: 3,
+    id: 3,
     title: "Michael Brown - Haircut & Beard Trim",
     start: new Date(new Date().setHours(11, 30, 0, 0)),
     end: new Date(new Date().setHours(12, 30, 0, 0)),
-    admin_id: "maasam",
-    color: "#f57c00"
+    resource: "maasam"
   }
 ];
 
 // Team members configuration
 const teamMembers = [
   { 
-    admin_id: "maasam",
+    id: "maasam",
     title: "Maasam branch",
-    mobile: "123-456-7890",
-    avatar: "M",
     color: "#3174ad"
   },
   {
-    admin_id: "jenny", 
+    id: "jenny", 
     title: "Jenny",
-    mobile: "123-456-7891",
-    avatar: "J",
     color: "#9c27b0"
   },
   {
-    admin_id: "emy",
+    id: "emy",
     title: "Emy", 
-    mobile: "123-456-7892",
-    avatar: "E",
     color: "#4caf50"
   },
   {
-    admin_id: "nadeen",
+    id: "nadeen",
     title: "Nadeen",
-    mobile: "123-456-7893", 
-    avatar: "N",
     color: "#e91e63"
   },
   {
-    admin_id: "raghe",
+    id: "raghe",
     title: "Raghe",
-    mobile: "123-456-7894",
-    avatar: "R", 
     color: "#ff9800"
   },
   {
-    admin_id: "rawan",
+    id: "rawan",
     title: "Rawan",
-    mobile: "123-456-7895",
-    avatar: "R",
     color: "#009688"
   },
   {
-    admin_id: "jannat",
+    id: "jannat",
     title: "Jannat",
-    mobile: "123-456-7896", 
-    avatar: "J",
     color: "#3f51b5"
   },
   {
-    admin_id: "areej",
+    id: "areej",
     title: "Areej",
-    mobile: "123-456-7897",
-    avatar: "A",
     color: "#f44336"
   },
   {
-    admin_id: "samar",
+    id: "samar",
     title: "Samar",
-    mobile: "123-456-7898",
-    avatar: "S",
     color: "#ffeb3b"
   }
 ];
 
 export const AppointmentScheduler = () => {
+  const [currentView, setCurrentView] = useState(Views.WEEK);
+  const [currentDate, setCurrentDate] = useState(new Date());
+
   const handleEventClick = (event: any) => {
     console.log("Event clicked:", event);
   };
 
-  const handleSlotClick = (start: Date, end: Date, resourceKey?: string, resourceVal?: string | number) => {
-    console.log("Slot clicked:", { start, end, resourceKey, resourceVal });
+  const handleSlotClick = (slotInfo: any) => {
+    console.log("Slot clicked:", slotInfo);
   };
+
+  const handleNavigate = (newDate: Date) => {
+    setCurrentDate(newDate);
+  };
+
+  const handleViewChange = (view: any) => {
+    setCurrentView(view);
+  };
+
+  const eventStyleGetter = (event: any) => {
+    const teamMember = teamMembers.find(member => member.id === event.resource);
+    const backgroundColor = teamMember?.color || '#3174ad';
+    
+    return {
+      style: {
+        backgroundColor,
+        borderRadius: '4px',
+        opacity: 0.8,
+        color: 'white',
+        border: '0px',
+        display: 'block'
+      }
+    };
+  };
+
+  const CustomToolbar = ({ label, onNavigate, onView }: any) => (
+    <div className="flex items-center justify-between mb-4 p-4 bg-gray-50 rounded-lg">
+      <div className="flex items-center space-x-2">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => onNavigate('PREV')}
+        >
+          <ChevronLeft className="w-4 h-4" />
+        </Button>
+        <span className="font-semibold text-lg min-w-[200px] text-center">{label}</span>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => onNavigate('NEXT')}
+        >
+          <ChevronRight className="w-4 h-4" />
+        </Button>
+      </div>
+      <div className="flex space-x-2">
+        <Button
+          variant={currentView === Views.MONTH ? "default" : "outline"}
+          size="sm"
+          onClick={() => onView(Views.MONTH)}
+        >
+          Month
+        </Button>
+        <Button
+          variant={currentView === Views.WEEK ? "default" : "outline"}
+          size="sm"
+          onClick={() => onView(Views.WEEK)}
+        >
+          Week
+        </Button>
+        <Button
+          variant={currentView === Views.DAY ? "default" : "outline"}
+          size="sm"
+          onClick={() => onView(Views.DAY)}
+        >
+          Day
+        </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => onNavigate('TODAY')}
+        >
+          Today
+        </Button>
+      </div>
+    </div>
+  );
 
   return (
     <Card className="w-full">
@@ -113,83 +178,49 @@ export const AppointmentScheduler = () => {
       </CardHeader>
       <CardContent>
         <div style={{ height: "600px" }}>
-          <Scheduler
-            view="week"
+          <Calendar
+            localizer={localizer}
             events={sampleEvents}
-            resources={teamMembers}
-            resourceFields={{
-              idField: "admin_id",
-              textField: "title",
-              subTextField: "mobile",
-              avatarField: "avatar",
-              colorField: "color"
+            startAccessor="start"
+            endAccessor="end"
+            view={currentView}
+            onView={handleViewChange}
+            date={currentDate}
+            onNavigate={handleNavigate}
+            onSelectEvent={handleEventClick}
+            onSelectSlot={handleSlotClick}
+            selectable
+            eventPropGetter={eventStyleGetter}
+            components={{
+              toolbar: CustomToolbar,
             }}
-            fields={[
-              {
-                name: "admin_id",
-                type: "select",
-                options: teamMembers.map(member => ({
-                  id: member.admin_id,
-                  text: member.title,
-                  value: member.admin_id
-                })),
-                config: { label: "Team Member", required: true }
-              }
-            ]}
-            onEventClick={handleEventClick}
-            onCellClick={handleSlotClick}
-            week={{
-              weekDays: [0, 1, 2, 3, 4, 5, 6],
-              weekStartOn: 6,
-              startHour: 8,
-              endHour: 23,
-              step: 60,
-              navigation: true,
-              disableGoToDay: false
+            min={new Date(0, 0, 0, 8, 0, 0)}
+            max={new Date(0, 0, 0, 23, 0, 0)}
+            step={60}
+            timeslots={1}
+            formats={{
+              timeGutterFormat: 'HH:mm',
+              eventTimeRangeFormat: ({ start, end }: any) => 
+                `${moment(start).format('HH:mm')} - ${moment(end).format('HH:mm')}`,
             }}
-            month={{
-              weekDays: [0, 1, 2, 3, 4, 5, 6],
-              weekStartOn: 6,
-              startHour: 8,
-              endHour: 23,
-              step: 60,
-              navigation: true
-            }}
-            day={{
-              startHour: 8,
-              endHour: 23,
-              step: 60,
-              navigation: true
-            }}
-            hourFormat="24"
-            timeZone="UTC"
-            translations={{
-              navigation: {
-                month: "Month",
-                week: "Week", 
-                day: "Day",
-                today: "Today",
-                agenda: "Agenda"
-              },
-              form: {
-                addTitle: "Add Event",
-                editTitle: "Edit Event",
-                confirm: "Confirm",
-                delete: "Delete",
-                cancel: "Cancel"
-              },
-              event: {
-                title: "Title",
-                subtitle: "Subtitle",
-                start: "Start",
-                end: "End",
-                allDay: "All Day"
-              },
-              moreEvents: "More...",
-              noDataToDisplay: "No data to display",
-              loading: "Loading..."
-            }}
+            className="rounded-lg"
           />
+        </div>
+        
+        {/* Team Members Legend */}
+        <div className="mt-4 p-4 bg-gray-50 rounded-lg">
+          <h4 className="font-semibold mb-3 text-sm text-gray-700">Team Members</h4>
+          <div className="flex flex-wrap gap-3">
+            {teamMembers.map((member) => (
+              <div key={member.id} className="flex items-center space-x-2">
+                <div 
+                  className="w-4 h-4 rounded-full"
+                  style={{ backgroundColor: member.color }}
+                />
+                <span className="text-sm text-gray-600">{member.title}</span>
+              </div>
+            ))}
+          </div>
         </div>
       </CardContent>
     </Card>
