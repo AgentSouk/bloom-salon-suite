@@ -775,37 +775,56 @@ const AppointmentsCalendar = () => {
 
     const newStaffId = parseInt(over.id);
     
-    // Find the staff column element
+    // Find the staff column element more reliably
     const staffColumn = document.querySelector(`[data-staff-id="${newStaffId}"]`);
     if (!staffColumn) return;
 
-    // Get the time slots container
+    // Get the time slots container - look for the container with time slots
     const timeSlotsContainer = staffColumn.querySelector('.relative');
     if (!timeSlotsContainer) return;
 
-    // Get container bounds and scroll position
-    const containerRect = timeSlotsContainer.getBoundingClientRect();
-    const scrollContainer = staffColumn.closest('.overflow-auto');
+    // Get the main scrollable container
+    const scrollContainer = document.querySelector('.appointments-calendar .overflow-auto');
     const scrollTop = scrollContainer ? scrollContainer.scrollTop : 0;
 
-    // Calculate position relative to the time slots container
-    const mouseY = event.y;
-    const containerY = containerRect.top;
-    const relativeY = mouseY - containerY + scrollTop;
+    // Get container bounds
+    const containerRect = timeSlotsContainer.getBoundingClientRect();
+    
+    // Calculate the Y position relative to the time slots container
+    // We need to account for both the drop position and scroll offset
+    const dropY = event.activatorEvent?.clientY || event.y;
+    const relativeY = (dropY - containerRect.top) + scrollTop;
+    
+    console.log('Drop calculation:', {
+      dropY,
+      containerTop: containerRect.top,
+      scrollTop,
+      relativeY
+    });
 
-    // Each 15-minute block is 16px high
+    // Each 15-minute block is 16px high (h-4 = 16px)
     const blockHeight = 16;
     
-    // Calculate the number of 15-minute blocks from the top
-    let blocksFromTop = Math.round(relativeY / blockHeight);
+    // Calculate which 15-minute block we're in
+    const blocksFromTop = Math.max(0, Math.floor(relativeY / blockHeight));
     
-    // Calculate total minutes from 8:00 AM
+    // Calculate total minutes from 8:00 AM start
     const minutesFromStart = blocksFromTop * 15;
-    const totalMinutes = 8 * 60 + minutesFromStart; // 8 hours in minutes + offset
-
-    // Calculate hour and minute
+    
+    // Convert to actual time
+    const startHour = 8;
+    const totalMinutes = startHour * 60 + minutesFromStart;
+    
     let hour = Math.floor(totalMinutes / 60);
-    let minute = Math.floor((totalMinutes % 60) / 15) * 15;
+    let minute = Math.floor((totalMinutes % 60) / 15) * 15; // Round to nearest 15-minute block
+
+    console.log('Time calculation:', {
+      blocksFromTop,
+      minutesFromStart,
+      totalMinutes,
+      hour,
+      minute
+    });
 
     // Calculate appointment duration in minutes
     const durationMinutes = appointment.services.reduce((acc, service) => {
@@ -818,12 +837,13 @@ const AppointmentsCalendar = () => {
       minute = 0;
     }
 
-    // Ensure the appointment doesn't end after 11:59 PM
+    // Ensure the appointment doesn't end after 11:59 PM (23:59)
     const endTimeMinutes = (hour * 60 + minute) + durationMinutes;
-    if (endTimeMinutes > (24 * 60)) {
-      // Adjust start time so appointment ends at 11:59 PM
-      hour = Math.floor((24 * 60 - durationMinutes) / 60);
-      minute = Math.floor(((24 * 60 - durationMinutes) % 60) / 15) * 15;
+    if (endTimeMinutes > (23 * 60 + 45)) { // Last slot should be 23:45
+      // Adjust start time so appointment ends by 23:59
+      const maxStartMinutes = (23 * 60 + 45) - durationMinutes;
+      hour = Math.floor(maxStartMinutes / 60);
+      minute = Math.floor((maxStartMinutes % 60) / 15) * 15;
     }
 
     const newStartTime = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
@@ -833,6 +853,12 @@ const AppointmentsCalendar = () => {
     startDate.setHours(hour, minute);
     const endDate = new Date(startDate.getTime() + durationMinutes * 60000);
     const newEndTime = `${endDate.getHours().toString().padStart(2, '0')}:${endDate.getMinutes().toString().padStart(2, '0')}`;
+
+    console.log('Final times:', {
+      newStartTime,
+      newEndTime,
+      durationMinutes
+    });
 
     // Check for overlapping appointments
     const hasOverlap = appointments.some(apt => {
@@ -861,7 +887,7 @@ const AppointmentsCalendar = () => {
     });
 
     if (hasOverlap) {
-      // If there's an overlap, return the appointment to its original position
+      console.log('Overlap detected, not moving appointment');
       return;
     }
 
@@ -880,6 +906,8 @@ const AppointmentsCalendar = () => {
         return apt;
       });
     });
+
+    console.log('Appointment moved successfully');
   };
 
   const sensors = useSensors(
