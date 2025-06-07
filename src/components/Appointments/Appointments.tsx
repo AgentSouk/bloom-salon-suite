@@ -13,24 +13,40 @@ import { AppointmentsHeader } from "./AppointmentsHeader";
 
 // Update the type definitions at the top of the file
 type Service = {
-  id: string;  // Added id field
+  id: string;
   name: string;
   duration: string;
   price: string;
 };
 
 type Client = {
-  id: number;  // Changed to number to match your data
+  id: number;
   name: string;
   phone: string;
-  initial: string;  // Added missing fields
+  initial: string;
   pronouns?: string;
   dob?: string;
   createdAt: string;
 };
 
+type Booking = {
+  id: string; // Unique booking ID for tracking in reports
+  appointmentId: number;
+  client: Client | null;
+  services: Service[];
+  staffId: number;
+  date: Date;
+  startTime: string;
+  endTime: string;
+  notes: string;
+  status: 'scheduled' | 'completed' | 'cancelled' | 'no-show';
+  createdAt: Date;
+  updatedAt: Date;
+};
+
 type Appointment = {
   id: number;
+  bookingId: string; // Reference to the booking
   client: Client | null;
   services: Service[];
   staffId: number;
@@ -81,23 +97,30 @@ const timeSlots = Array.from({ length: 64 }, (_, i) => {
   return `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
 });
 
-// Sample services with pricing
-const servicesData = [
-  { name: 'APPLE Beard Dye', duration: '1h', price: 'AED 30' },
-  { name: 'Haircut+ blowdry', duration: '1h', price: 'from AED 220' },
-  { name: 'Haircut+ blowdry', duration: '1h', price: 'AED 250' },
-  { name: 'Haircut+ blowdry', duration: '1h', price: 'AED 300' },
-  { name: 'Haircut+ blowdry', duration: '1h', price: 'AED 350' },
-  { name: 'Children Color (Spray)', duration: '1h', price: 'AED 10' },
-  { name: 'Children Color (Spray)', duration: '1h', price: 'AED 20' },
-  { name: "Children's haircut", duration: '1h', price: 'AED 50' },
-  { name: "Children's haircut", duration: '1h', price: 'AED 80' },
-  { name: "Children's haircut", duration: '1h', price: 'AED 150' },
-  { name: "Children's haircut", duration: '1h', price: 'AED 200' },
-  { name: 'Hair Cut', duration: '20min', price: 'AED 80' },
-  { name: 'Wavy', duration: '1h', price: 'AED 100' },
-  { name: 'Blow dry', duration: '1h', price: 'AED 190' },
+// Sample services with pricing - now with proper IDs
+const servicesData: Service[] = [
+  { id: 'svc_001', name: 'APPLE Beard Dye', duration: '1h', price: 'AED 30' },
+  { id: 'svc_002', name: 'Haircut+ blowdry', duration: '1h', price: 'from AED 220' },
+  { id: 'svc_003', name: 'Haircut+ blowdry', duration: '1h', price: 'AED 250' },
+  { id: 'svc_004', name: 'Haircut+ blowdry', duration: '1h', price: 'AED 300' },
+  { id: 'svc_005', name: 'Haircut+ blowdry', duration: '1h', price: 'AED 350' },
+  { id: 'svc_006', name: 'Children Color (Spray)', duration: '1h', price: 'AED 10' },
+  { id: 'svc_007', name: 'Children Color (Spray)', duration: '1h', price: 'AED 20' },
+  { id: 'svc_008', name: "Children's haircut", duration: '1h', price: 'AED 50' },
+  { id: 'svc_009', name: "Children's haircut", duration: '1h', price: 'AED 80' },
+  { id: 'svc_010', name: "Children's haircut", duration: '1h', price: 'AED 150' },
+  { id: 'svc_011', name: "Children's haircut", duration: '1h', price: 'AED 200' },
+  { id: 'svc_012', name: 'Hair Cut', duration: '20min', price: 'AED 80' },
+  { id: 'svc_013', name: 'Wavy', duration: '1h', price: 'AED 100' },
+  { id: 'svc_014', name: 'Blow dry', duration: '1h', price: 'AED 190' },
 ];
+
+// Utility function to generate booking IDs
+const generateBookingId = (): string => {
+  const timestamp = Date.now();
+  const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+  return `BK${timestamp}${random}`;
+};
 
 // Get current time indicator position
 const getCurrentTimePosition = () => {
@@ -346,7 +369,7 @@ const CheckoutSheet = ({ isOpen, onClose, services, onConfirm }) => {
             <div className="flex-1 p-6">
               <div className="space-y-6">
                 {services.map((service, index) => (
-                  <div key={index} className="flex justify-between items-start pb-6 border-b border-gray-100 last:border-0">
+                  <div key={service.id} className="flex justify-between items-start pb-6 border-b border-gray-100 last:border-0">
                     <div>
                       <p className="text-lg font-medium mb-2">{service.name}</p>
                       <p className="text-base text-gray-500">1h • Mohamad</p>
@@ -407,6 +430,7 @@ const CheckoutSheet = ({ isOpen, onClose, services, onConfirm }) => {
 const AppointmentsCalendar = () => {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [appointments, setAppointments] = useState<Appointment[]>([]);
+  const [bookings, setBookings] = useState<Booking[]>([]);
   
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isServicePanelOpen, setIsServicePanelOpen] = useState(false);
@@ -418,6 +442,7 @@ const AppointmentsCalendar = () => {
   const [isSaving, setIsSaving] = useState(false);
   const [showSaveConfirmation, setShowSaveConfirmation] = useState(false);
   const [editingAppointmentId, setEditingAppointmentId] = useState<number | null>(null);
+  const [currentBookingId, setCurrentBookingId] = useState<string | null>(null);
   const [showQuickActions, setShowQuickActions] = useState(false);
   const [isSelectingClient, setIsSelectingClient] = useState(false);
   const [clientSearchTerm, setClientSearchTerm] = useState("");
@@ -459,6 +484,11 @@ const AppointmentsCalendar = () => {
   };
 
   const handleTimeSlotClick = (staffId, date, timeSlot) => {
+    // Generate new booking ID when starting a new appointment
+    const newBookingId = generateBookingId();
+    console.log('Starting new booking with ID:', newBookingId);
+    
+    setCurrentBookingId(newBookingId);
     setEditingAppointmentId(null);
     setSelectedSlot({ staffId, date, timeSlot });
     setSelectedServices([]);
@@ -470,6 +500,9 @@ const AppointmentsCalendar = () => {
   };
 
   const handleAppointmentClick = (appointment) => {
+    console.log('Editing appointment with booking ID:', appointment.bookingId);
+    
+    setCurrentBookingId(appointment.bookingId);
     setEditingAppointmentId(appointment.id);
     setSelectedSlot({ 
         staffId: appointment.staffId, 
@@ -509,7 +542,7 @@ const AppointmentsCalendar = () => {
   };
 
   const handleSaveAppointment = () => {
-    if (!selectedSlot || selectedServices.length === 0) return;
+    if (!selectedSlot || selectedServices.length === 0 || !currentBookingId) return;
 
     setIsSaving(true);
 
@@ -525,6 +558,7 @@ const AppointmentsCalendar = () => {
 
     const appointmentData = {
       id: editingAppointmentId || Date.now(),
+      bookingId: currentBookingId,
       client: client,
       services: selectedServices,
       staffId: selectedSlot.staffId,
@@ -534,18 +568,40 @@ const AppointmentsCalendar = () => {
       notes: ""
     };
 
+    // Create or update booking record
+    const bookingData: Booking = {
+      id: currentBookingId,
+      appointmentId: appointmentData.id,
+      client: client,
+      services: selectedServices,
+      staffId: selectedSlot.staffId,
+      date: selectedSlot.date,
+      startTime: selectedSlot.timeSlot,
+      endTime: appointmentData.endTime,
+      notes: "",
+      status: 'scheduled',
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
+
     setTimeout(() => {
         if (editingAppointmentId) {
             setAppointments(appointments.map(a => a.id === editingAppointmentId ? appointmentData : a));
+            setBookings(bookings.map(b => b.id === currentBookingId ? bookingData : b));
         } else {
             setAppointments([...appointments, appointmentData]);
+            setBookings([...bookings, bookingData]);
         }
+        
+        console.log('Booking saved with ID:', currentBookingId, 'for reports tracking');
+        
         setIsSaving(false);
         setIsServicePanelOpen(false);
-    setSelectedSlot(null);
+        setSelectedSlot(null);
         setSelectedServices([]);
         setClient(null);
         setEditingAppointmentId(null);
+        setCurrentBookingId(null);
 
         setShowSaveConfirmation(true);
         setTimeout(() => {
@@ -612,10 +668,10 @@ const AppointmentsCalendar = () => {
                 <button className="w-full flex items-center gap-3 p-2 rounded-md hover:bg-gray-100 text-sm">
                     Reschedule
                 </button>
-                <button className="w-full flex items-center gap-3 p-2 rounded-md hover:bg-red-50 text-red-600 text-sm">
+                <button className="w-full flex items-center gap-3 p-2 rounded-md hover:bg-gray-100 text-sm">
                     <XCircle size={16} /> No-show
                 </button>
-                <button className="w-full flex items-center gap-3 p-2 rounded-md hover:bg-red-50 text-red-600 text-sm">
+                <button className="w-full flex items-center gap-3 p-2 rounded-md hover:bg-gray-100 text-sm">
                     <Trash2 size={16} /> Cancel
                 </button>
             </div>
@@ -688,6 +744,7 @@ const AppointmentsCalendar = () => {
               }
               e.stopPropagation();
             }}
+            title={`Booking ID: ${appointment.bookingId}`}
         >
             <div className="absolute inset-0 flex flex-col">
                 {appointment.services.map((service, index) => {
@@ -695,7 +752,7 @@ const AppointmentsCalendar = () => {
                     const heightPercentage = (serviceDuration / totalDuration) * 100;
                     return (
                       <div 
-                        key={`${service.name}-${index}`}
+                        key={service.id}
                         style={{ 
                           height: `${heightPercentage}%`, 
                           backgroundColor: serviceColors[index % serviceColors.length],
@@ -713,7 +770,7 @@ const AppointmentsCalendar = () => {
                     const serviceDuration = calculateServiceDuration(service.duration);
                     const flexGrow = serviceDuration / 15;
                     return (
-                        <div key={`${service.name}-${index}`} className="overflow-hidden" style={{ flexGrow: flexGrow }}>
+                        <div key={service.id} className="overflow-hidden" style={{ flexGrow: flexGrow }}>
                             <p className="font-bold truncate">{appointment.client?.name ?? 'Walk-In'}</p>
                             <p className="truncate">{service.name}</p>
                         </div>
@@ -733,8 +790,9 @@ const AppointmentsCalendar = () => {
                         </div>
                         <span className="font-semibold">{appointment.client ? appointment.client.name : 'Walk-In'}</span>
                     </div>
+                    <div className="text-xs text-gray-500 mb-2">Booking ID: {appointment.bookingId}</div>
                     {appointment.services.map((service, index) => (
-                       <div key={`${service.name}-${index}`} className="flex justify-between items-center text-sm mb-1">
+                       <div key={service.id} className="flex justify-between items-center text-sm mb-1">
                            <span>{service.name}</span>
                            <span className="font-semibold">{service.price}</span>
                        </div>
@@ -857,7 +915,8 @@ const AppointmentsCalendar = () => {
     console.log('Final times:', {
       newStartTime,
       newEndTime,
-      durationMinutes
+      durationMinutes,
+      bookingId: appointment.bookingId
     });
 
     // Check for overlapping appointments
@@ -891,7 +950,7 @@ const AppointmentsCalendar = () => {
       return;
     }
 
-    // Update the appointment
+    // Update the appointment and booking
     setAppointments(prevAppointments => {
       return prevAppointments.map(apt => {
         if (apt.id === appointmentId) {
@@ -907,7 +966,24 @@ const AppointmentsCalendar = () => {
       });
     });
 
-    console.log('Appointment moved successfully');
+    // Update the corresponding booking
+    setBookings(prevBookings => {
+      return prevBookings.map(booking => {
+        if (booking.appointmentId === appointmentId) {
+          return {
+            ...booking,
+            staffId: newStaffId,
+            date: currentDate,
+            startTime: newStartTime,
+            endTime: newEndTime,
+            updatedAt: new Date()
+          };
+        }
+        return booking;
+      });
+    });
+
+    console.log('Appointment moved successfully, booking updated for tracking');
   };
 
   const sensors = useSensors(
@@ -934,7 +1010,7 @@ const AppointmentsCalendar = () => {
     const timeString = `${serviceStartTime.getHours().toString().padStart(2, '0')}:${serviceStartTime.getMinutes().toString().padStart(2, '0')}`;
 
     return (
-      <div key={index} className="flex justify-between items-start mb-4">
+      <div key={service.id} className="flex justify-between items-start mb-4">
         <div className="flex gap-3">
           <div className="w-1 self-stretch rounded" style={{ backgroundColor: serviceColors[index % serviceColors.length] }} />
           <div>
@@ -968,7 +1044,7 @@ const AppointmentsCalendar = () => {
 
   const handlePaymentConfirm = (paymentMethod) => {
     // Process payment here
-    console.log(`Processing payment via ${paymentMethod}`);
+    console.log(`Processing payment via ${paymentMethod} for booking ${currentBookingId}`);
     setIsCheckoutOpen(false);
     handleSaveAppointment();
   };
@@ -1103,6 +1179,7 @@ const AppointmentsCalendar = () => {
                     onClick={() => {
                       setIsServicePanelOpen(false);
                       setEditingAppointmentId(null);
+                      setCurrentBookingId(null);
                     }}
                 >
                     <X size={20} />
@@ -1113,6 +1190,7 @@ const AppointmentsCalendar = () => {
                     </h2>
                     <p className="text-sm text-gray-600">
                       {selectedSlot && `${formatDate(selectedSlot.date)} at ${selectedSlot.timeSlot}`}
+                      {currentBookingId && ` • Booking ID: ${currentBookingId}`}
                     </p>
                   </div>
                 </div>
@@ -1313,11 +1391,17 @@ const AppointmentsCalendar = () => {
           isOpen={isCancelling}
           onClose={() => setIsCancelling(false)}
           onConfirm={(reason) => {
-            console.log(`Appointment ${editingAppointmentId} cancelled. Reason: ${reason}`);
+            console.log(`Appointment ${editingAppointmentId} cancelled. Reason: ${reason}. Booking ID: ${currentBookingId}`);
             setAppointments(prev => prev.filter(app => app.id !== editingAppointmentId));
+            setBookings(prev => prev.map(booking => 
+              booking.appointmentId === editingAppointmentId 
+                ? { ...booking, status: 'cancelled' as const, updatedAt: new Date() }
+                : booking
+            ));
             setIsCancelling(false);
             setIsServicePanelOpen(false);
             setEditingAppointmentId(null);
+            setCurrentBookingId(null);
           }}
         />
 
