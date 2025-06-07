@@ -8,7 +8,7 @@ import { TeamManagement } from "@/components/team/TeamManagement";
 import { POSSystem } from "@/components/pos/POSSystem";
 import { SalesReports } from "@/components/reports/SalesReports";
 import { Calendar } from "@/components/calendar/Calendar";
-import Appointments from "@/components/Appointments/Appointments";
+import AppointmentsCalendar from "@/components/Appointments/Appointments";
 
 const Index = () => {
   const [activeView, setActiveView] = useState("dashboard");
@@ -18,7 +18,7 @@ const Index = () => {
       case "dashboard":
         return <Dashboard />;
       case "appointments":
-        return <Appointments />;
+        return <AppointmentsCalendar />;
       case "calendar":
         return <Calendar />;
       case "clients":

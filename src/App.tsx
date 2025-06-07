@@ -7,7 +7,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { useState } from "react";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
-import Appointments from "./components/Appointments/Appointments";
+import AppointmentsCalendar from "./components/Appointments/Appointments";
 
 const App = () => {
   const [queryClient] = useState(
@@ -30,7 +30,7 @@ const App = () => {
         <BrowserRouter>
           <Routes>
             <Route path="/" element={<Index />} />
-            <Route path="/appointments" element={<Appointments />} />
+            <Route path="/appointments" element={<AppointmentsCalendar />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
