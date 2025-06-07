@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -106,7 +107,7 @@ const getAppointmentColor = (status: string) => {
     case "started": 
       return "bg-green-200 text-green-800 border-green-300";
     case "completed":
-      return "bg-gray-100 text-gray-600 border-gray-300";
+      return "bg-gray-200 text-gray-600 border-gray-300";
     case "voided":
       return "bg-red-100 text-red-600 border-red-300";
     default:
@@ -128,7 +129,7 @@ const calculateStartSlot = (time: string): number => {
   return minutesFrom9AM / 15;
 };
 
-export const Appointments = () => {
+const AppointmentsCalendar = () => {
   const { toast } = useToast();
   const [currentDate, setCurrentDate] = useState("Thu 5 Jun");
   const [appointments, setAppointments] = useState<Appointment[]>([]);
@@ -154,8 +155,8 @@ export const Appointments = () => {
   const [notes, setNotes] = useState("");
 
   const handleDragStart = (event: DragStartEvent) => {
-    setActiveId(event.active.id);
-    const dragged = appointments.find(apt => apt.id === event.active.id);
+    setActiveId(String(event.active.id));
+    const dragged = appointments.find(apt => apt.id === String(event.active.id));
     setDraggedAppointment(dragged || null);
   };
 
@@ -164,13 +165,56 @@ export const Appointments = () => {
     setDraggedAppointment(null);
 
     const { active, over } = event;
-    if (over && active.id !== over.id) {
-      const oldIndex = appointments.findIndex(apt => apt.id === active.id);
-      const newIndex = appointments.findIndex(apt => apt.id === over.id);
+    if (!over || !calendarRef.current) return;
 
-      setAppointments(items => {
-        const newItems = arrayMove(items, oldIndex, newIndex);
-        return newItems;
+    const appointmentId = String(active.id);
+    const appointment = appointments.find(apt => apt.id === appointmentId);
+    if (!appointment) return;
+
+    // Get the drop zone coordinates
+    const calendarRect = calendarRef.current.getBoundingClientRect();
+    const dropX = event.delta.x + event.activatorEvent?.clientX || 0;
+    const dropY = event.delta.y + event.activatorEvent?.clientY || 0;
+
+    // Calculate relative position within calendar
+    const relativeX = dropX - calendarRect.left;
+    const relativeY = dropY - calendarRect.top;
+
+    // Account for scroll position
+    const scrollTop = calendarRef.current.scrollTop || 0;
+    const adjustedY = relativeY + scrollTop;
+
+    // Calculate which member column (each column is ~160px wide, first 80px is time column)
+    const timeColumnWidth = 80;
+    const memberColumnWidth = 160;
+    const memberIndex = Math.floor((relativeX - timeColumnWidth) / memberColumnWidth);
+    
+    // Calculate which time slot (each slot is 60px high, with 64px header)
+    const headerHeight = 64;
+    const slotHeight = 60;
+    const slotIndex = Math.floor((adjustedY - headerHeight) / slotHeight);
+
+    // Validate bounds
+    if (memberIndex >= 0 && memberIndex < teamMembers.length && slotIndex >= 0 && slotIndex < timeSlots.length) {
+      const newMemberId = parseInt(teamMembers[memberIndex].id);
+      const newStartSlot = slotIndex;
+      const newTime = timeSlots[slotIndex];
+      const endTime = calculateEndTime(newTime, parseInt(appointment.service.includes("Classic") ? "60" : "30"));
+
+      setAppointments(prev => prev.map(apt => 
+        apt.id === appointmentId 
+          ? { 
+              ...apt, 
+              memberId: newMemberId,
+              startSlot: newStartSlot,
+              time: `${newTime} - ${endTime}`
+            }
+          : apt
+      ));
+
+      toast({
+        title: "Appointment Moved",
+        description: `Moved to ${teamMembers[memberIndex].name} at ${newTime}`,
       });
     }
   };
@@ -637,6 +681,13 @@ export const Appointments = () => {
                     </div>
                   </div>
                 )}
+
+                {selectedAppointment.status === 'voided' && selectedAppointment.booking?.voidReason && (
+                  <div className="p-3 bg-red-50 rounded-lg">
+                    <div className="font-medium text-red-800">Void Reason</div>
+                    <div className="text-sm text-red-600">{selectedAppointment.booking.voidReason}</div>
+                  </div>
+                )}
               </div>
 
               {/* Quick Actions */}
@@ -792,3 +843,5 @@ const SortableAppointmentCard = ({ appointment, onClick }: { appointment: Appoin
     </div>
   );
 };
+
+export default AppointmentsCalendar;
