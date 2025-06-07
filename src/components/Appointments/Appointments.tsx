@@ -12,7 +12,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Plus, ChevronLeft, ChevronRight, Calendar, Clock, User, DollarSign, Phone, Mail, MapPin, Edit, Trash2, MoreHorizontal, RefreshCw, FileText, MessageSquare, Send, Printer, Download, X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { DndContext, DragEndEvent, DragOverlay, DragStartEvent } from '@dnd-kit/core';
+import { DndContext, DragEndEvent, DragStartEvent, DragOverlay } from '@dnd-kit/core';
 import { SortableContext, arrayMove, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
@@ -792,3 +792,5 @@ const SortableAppointmentCard = ({ appointment, onClick }: { appointment: Appoin
     </div>
   );
 };
+
+export default Appointments;

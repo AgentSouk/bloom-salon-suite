@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { Dashboard } from "@/components/dashboard/Dashboard";
@@ -7,7 +8,7 @@ import { TeamManagement } from "@/components/team/TeamManagement";
 import { POSSystem } from "@/components/pos/POSSystem";
 import { SalesReports } from "@/components/reports/SalesReports";
 import { Calendar } from "@/components/calendar/Calendar";
-import AppointmentsCalendar from "@/components/Appointments/Appointments";
+import Appointments from "@/components/Appointments/Appointments";
 
 const Index = () => {
   const [activeView, setActiveView] = useState("dashboard");
@@ -17,7 +18,7 @@ const Index = () => {
       case "dashboard":
         return <Dashboard />;
       case "appointments":
-        return <AppointmentsCalendar />;
+        return <Appointments />;
       case "calendar":
         return <Calendar />;
       case "clients":
